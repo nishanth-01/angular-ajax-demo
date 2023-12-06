@@ -19,4 +19,8 @@ export class LogoutComponent {
     apiLogout();
     this.router.navigate(['/login']);
   }
+
+  onLogoutCancel() {
+    this.router.navigate(['/app']);
+  }
 }
