@@ -1,0 +1,18 @@
+<h2>Admin App</h2>
+<button (click)="onLogoutRequest()">Logout</button><br>
+<button (click)="onGoHomeRequest()">Home</button><br>
+<form>
+  <label>
+    API Delay (in seconds) ({{MIN_DELAY}} to {{MAX_DELAY}}):
+    <input
+      type="text"
+      inputmode="numeric"
+      pattern="\d*"
+      min={{MIN_DELAY}}
+      max={{MAX_DELAY}}
+      #delay
+      (click)="onInputChange(delay.value)"/>
+  </label>
+  <button (click)="onSetDelay()">Set Delay</button>
+</form>
+<p style="color:{{messageColor}};">{{message}}</p>

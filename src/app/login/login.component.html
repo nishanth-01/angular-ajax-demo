@@ -1,0 +1,12 @@
+<h2>Login</h2>
+<form>
+  <label> User Id (4 digit number):<br>
+    <input type="text" #inputUserId (change)='onUserIdChange(inputUserId.value)'/>
+  </label><br>
+  <label> Password (1 to 4 lower case alphabets):<br>
+    <input type="password" #inputPassword (change)='onPasswordChange(inputPassword.value)'/>
+  </label><br>
+  <button (click)="onLoginRequest()">Login</button>
+</form>
+
+<p style='color:red;'>{{errMsg}}</p>

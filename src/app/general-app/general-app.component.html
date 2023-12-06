@@ -1,0 +1,23 @@
+<a routerLink='/logout'>Logout</a><br>
+<a routerLink='/app/admin'>Admin</a><br>
+<button (click)='onGetUsers()'>Get Users</button>
+
+<div *ngIf='error==""; then appBlock else errorBlock'></div>
+
+<ng-template #appBlock>
+  <div *ngIf='!users.length'>No Users Found!</div>
+  <cdk-virtual-scroll-viewport itemSize='users.length'>
+    <div *cdkVirtualFor='let user of users'>
+      Id: {{user.id}}, Role: {{user.role}}
+    </div>
+  </cdk-virtual-scroll-viewport>
+</ng-template>
+
+<ng-template #errorBlock>
+  <ng-container [ngSwitch]='error'>
+    <div [ngSwitch]='"login"'>
+      <a routerLink='/login'>Login</a> to continue
+    </div>
+    <div [ngSwitch]='"server"'>Server Side Error</div>
+  </ng-container>
+</ng-template>
