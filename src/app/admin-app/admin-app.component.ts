@@ -1,6 +1,7 @@
-import { Component, NgModule, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormGroupDirective, FormBuilder } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { User } from '../common';
 import { apiDelay } from '../api';
@@ -9,39 +10,19 @@ import * as config from '../../../config';
 @Component({
   selector: 'app-admin-app',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './admin-app.component.html',
   styleUrl: './admin-app.component.css'
 })
 export class AdminAppComponent implements OnInit {
-  delay: number = NaN;
+  MAX_DELAY = config.MAX_DELAY;
+
+  // Initialized in ngOnInit
+  // @ts-ignore: Object is possibly 'null'.
+  delayForm: FormControl;
   message = '';
   messageColor: 'red' | 'green' = 'green';
-  delayForm = this.formBuilder.group({
-    delay: `-`
-  });
 
-  constructor(
-    private router: Router, private formBuilder: FormBuilder
-  ) {}
-
-  get MIN_DELAY() {
-    return config.MIN_DELAY;
-  }
-
-  get MAX_DELAY() {
-    return config.MAX_DELAY;
-  }
-
-  private validDelay(): boolean {
-    if(Number.isInteger(this.delay)) {
-      if (this.delay>=this.MIN_DELAY
-        && this.delay<=this.MAX_DELAY) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   private showMessage(msg: string) {
     this.message = msg;
@@ -54,51 +35,48 @@ export class AdminAppComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.delayForm = new FormControl('',
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.min(0),
+          Validators.max(this.MAX_DELAY),
+          Validators.pattern(/^\d+$/)
+        ]
+      }
+    );
+
     const res = apiDelay();
     if (res.err) {
       this.showError('Unable to fetch current delay');
       return;
     }
-    this.delay = res.oldDelay;
+    this.delayForm.reset(res.oldDelay.toString(10));
   }
 
-  onGoHomeRequest() {
-    this.router.navigate(['/app']);
-  }
-
-  onLogoutRequest() {
-    this.router.navigate(['/logout']);
-  }
-
-  onInputChange(delay: string) {
-    this.delay = Number(delay);
-  }
-
-  onSetDelay() {
-    if (!this.validDelay()) {
-      this.showError('Invalid Input');
-      return;
-    }
-
-    const res = apiDelay(this.delay);
+  onSubmit() {
+    const res = apiDelay(Number(this.delayForm.value));
     if (res.err) {
-      this.delay = res.oldDelay;
+      if (res.oldDelay) {
+        this.delayForm.reset(res.oldDelay.toString());
+      }
+      this.delayForm.reset();
 
+      let errMsg = 'Error';
       if (res.err === 'client') {
         this.showError('Invalid Input');
+        errMsg = 'Invalid Input';
       }
       if (res.err === 'server') {
         this.showError('Server Error');
+        errMsg = 'Server Error';
       }
-      this.showError('Error');
+      this.showError(errMsg);
       return;
     }
 
-    this.delay = res.newDelay;
-    this.showMessage(`API delay has been updated from ${res.oldDelay} to ${res.newDelay} second${(res.newDelay==1)?'':'s'}`);
-  }
-
-  onSetDelaySubmit() {
-    this.delayForm.reset();
+    this.delayForm.reset(res.newDelay.toString(10));
+    this.showMessage(`API delay changed from ${res.oldDelay} to ${res.newDelay} second${(res.newDelay==1)?'':'s'}`);
   }
 }

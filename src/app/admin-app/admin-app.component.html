@@ -1,24 +1,17 @@
 <h2>Admin App</h2>
-<button (click)="onLogoutRequest()">Logout</button><br>
-<button (click)="onGoHomeRequest()">Home</button><br>
-<form [formGroup]="delayForm" (ngSubmit)="onSetDelaySubmit()">
-  <label for="delay">
-    API Delay (in seconds) ({{MIN_DELAY}} to {{MAX_DELAY}}):
-    <input
-      id="delay"
-      type="text"
-      formControlName="delay"
-      inputmode="numeric"
-      pattern="\d*"
-      min="{{MIN_DELAY}}"
-      max="{{MAX_DELAY}}"
-      value="{{(delay)?delay:'-'}}"
-      #delay
-      (click)="onInputChange(delay.value)"/>
-  </label>
-  <br>
-  <button type="submit">Set Delay</button>
-</form>
+<nav>
+<a routerLink='/app'>Home</a>
+| <a routerLink='/logout'>Logout</a>
+</nav>
+<br>
+
+<label for="delay">API Delay :</label><br>
+<input id="delay" type="text" [formControl]="delayForm"/>
+<span> seconds<span>
+<div style="color:red;" *ngIf='delayForm.invalid'>Enter a number between 0 to {{MAX_DELAY}}</div>
+<br>
+<button type="button" [disabled]="delayForm.invalid" (click)="onSubmit()">Set Delay</button>
+
 <br>
 <!-- TODO: check if {{}} works inside string -->
 <p style="color:{{messageColor}};">{{message}}</p>

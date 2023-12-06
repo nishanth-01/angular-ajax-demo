@@ -1,6 +1,11 @@
-<a routerLink='/logout'>Logout</a><br>
-<a routerLink='/app/admin'>Admin</a><br>
-<button (click)='onGetUsers()'>Get Users</button>
+<h2>Home</h2>
+<nav>
+<a routerLink='/app/admin'>Admin</a>
+| <a routerLink='/logout'>Logout</a>
+</nav>
+<br>
+
+<div><button (click)='onGetUsers()'>Get Users</button></div>
 
 <div *ngIf='error==""; then appBlock else errorBlock'></div>
 
