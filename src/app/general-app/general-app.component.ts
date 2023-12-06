@@ -21,8 +21,8 @@ export class GeneralAppComponent implements OnInit{
   private updateUsers() {
     const res = apiFetchUsers();
 
-    if(res.error) {
-      if(res.error === 'login') {
+    if(res.err) {
+      if(res.err === 'login') {
         this.error = 'login';
       }
       this.error = 'server';
