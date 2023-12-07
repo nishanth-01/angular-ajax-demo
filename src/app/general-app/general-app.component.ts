@@ -16,16 +16,19 @@ import { apiFetchUsers } from '../api'
 })
 export class GeneralAppComponent implements OnInit{
   users: User[] = [];
-  error: 'login' | 'server' | '' = '';
+  loginError = false;
+  errorMessage = '';
 
   private updateUsers() {
     const res = apiFetchUsers();
+    this.loginError = false;
 
     if(res.err) {
       if(res.err === 'login') {
-        this.error = 'login';
+        this.loginError = true;
+        return
       }
-      this.error = 'server';
+      this.errorMessage = 'Unable to update';
       return;
     }
 
@@ -36,7 +39,7 @@ export class GeneralAppComponent implements OnInit{
     this.updateUsers();
   }
 
-  onGetUsers() {
+  onUpdate() {
     this.updateUsers();
   }
 }

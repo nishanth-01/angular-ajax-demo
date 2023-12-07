@@ -1,12 +1,13 @@
 <h2>Login</h2>
-<form>
-  <label> User Id (4 digit number):<br>
-    <input type="text" #inputUserId (change)='onUserIdChange(inputUserId.value)'/>
-  </label><br>
-  <label> Password (1 to 4 lower case alphabets):<br>
-    <input type="password" #inputPassword (change)='onPasswordChange(inputPassword.value)'/>
-  </label><br>
-  <button (click)="onLoginRequest()">Login</button>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+  <label for="1">User Id (4 digit number):</label><br>
+  <input id="1" type="text" formControlName="userId"/><br>
+
+  <label for="2">Password (1 to 4 lower case alphabets):</label><br>
+  <input id="2" type="password" formControlName="password"/><br>
+
+  <button type="text" [disabled]="!loginForm.valid" formnovalidate>Login</button>
 </form>
 
 <p style='color:red;'>{{errMsg}}</p>

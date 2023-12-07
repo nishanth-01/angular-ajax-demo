@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, Routes, RouterOutlet, RouterLink, RouterLinkActive} from '@angular/router';
+import { FormsModule, FormGroup, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { User, UserCredentials, LoginError, validCredentials, login } from '../common'
+import { apiLogin } from '../api'
 
 
 @Component({
@@ -11,58 +11,65 @@ import { User, UserCredentials, LoginError, validCredentials, login } from '../c
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
-  private errMsgInput = 'Invalid input: User Id - 4 digit number, password - 1 to 4 lower case alphabets';
-  private errMsgOther = 'Login request failed';
+export class LoginComponent implements OnInit {
   private reUserId = /^[0-9]{4}$/;
   private rePassword = /^[a-z]{1,4}$/;
+  // Initialized in ngOnInit
+  // @ts-ignore: Object is possibly 'null'.
+  loginForm: FormGroup;
 
   userId: string = '';
   password: string = '';
   errMsg = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private formBuilder: FormBuilder
+  ) {}
 
-  onUserIdChange(s: string | null) {
-    if (!s) {
-      this.userId = '';
-    }
-    this.userId = s as string;
+  ngOnInit() {
+    this.loginForm = this.formBuilder.group({
+      userId: ['', {
+          nonNullable: true,
+          validators: [
+            Validators.required,
+            Validators.pattern(this.reUserId)
+          ]
+      }],
+      password: ['', {
+          nonNullable: true,
+          validators: [
+            Validators.required,
+            Validators.pattern(this.rePassword)
+          ]
+      }]
+    });
   }
 
-  onPasswordChange(s: string | null) {
-    if (!s) {
-      this.password = '';
-    }
-    this.password = s as string;
-  }
+  onSubmit() {
+    const res = apiLogin({
+      id: this.loginForm.value.userId.value,
+      password: this.loginForm.value.password.value
+    });
 
-  validCredentials(): boolean {
-    return this.reUserId.test(this.userId)
-      && this.rePassword.test(this.password);
-  }
-
-  onLoginRequest() {
-    if (!this.validCredentials()) {
-      this.errMsg = this.errMsgInput;
+    if(res.err) {
+      let msg = 'Request Failed';
+      if(res.err === 'WRONG') {
+        msg = 'Cannot find user';
+      }
+      if(res.err === 'INVALID') {
+        msg = 'Input Error';
+      }
+      this.errMsg = msg;
       return;
     }
 
-    let u = login({id: this.userId, password: this.password});
-
-    if (!u) {
-      this.errMsg = this.errMsgOther;
-      return;
-    }
-
-    this.errMsg = '';
-    if (u.role === 'admin')
-      this.router.navigate(['/app/admin']);
     this.router.navigate(['/app']);
   }
 }
