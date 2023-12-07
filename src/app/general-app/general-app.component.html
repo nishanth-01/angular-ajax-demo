@@ -1,28 +1,14 @@
 <h2>Home</h2>
 <nav>
-<a routerLink='/app/admin'>Admin</a>
-| <a routerLink='/logout'>Logout</a>
+<a routerLink="/app/admin">Admin</a>
+| <a routerLink="/logout">Logout</a>
 </nav>
-<br>
 
-<div><button (click)='onGetUsers()'>Get Users</button></div>
+<p *ngIf="loginError"><a routerLink="/login">Login</a> to continue</p>
+<p *ngIf="errorMessage">{{errorMessage}}</p>
+<button (click)="onUpdate()">Update</button><br>
 
-<div *ngIf='error==""; then appBlock else errorBlock'></div>
-
-<ng-template #appBlock>
-  <div *ngIf='!users.length'>No Users Found!</div>
-  <cdk-virtual-scroll-viewport itemSize='users.length'>
-    <div *cdkVirtualFor='let user of users'>
-      Id: {{user.id}}, Role: {{user.role}}
-    </div>
-  </cdk-virtual-scroll-viewport>
-</ng-template>
-
-<ng-template #errorBlock>
-  <ng-container [ngSwitch]='error'>
-    <div [ngSwitch]='"login"'>
-      <a routerLink='/login'>Login</a> to continue
-    </div>
-    <div [ngSwitch]='"server"'>Server Side Error</div>
-  </ng-container>
-</ng-template>
+<div *ngFor="let user of users">
+  <div>Id:{{user.id}} Role:{{user.role}}</div>
+</div>
+<p *ngIf="!users.length">No Users Found</p>
