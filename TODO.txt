@@ -1,1 +1,2 @@
-- Add access control to admin app component
+- add access control to admin app component
+- replace boolean expressions invloving 'NaN' if '0' is a valid value
