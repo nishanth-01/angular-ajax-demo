@@ -1,0 +1,12 @@
+{
+  "name": "angular-ajax-demo",
+  "workspaces": [
+    "app",
+    "server"
+  ],
+  "scripts": {
+    "precopyStaticFiles": "rm -r ./server/static/*",
+    "copyStaticFiles": "copyfiles -fE ./app/dist/interview-demo/**/* ./server/static",
+    "start": "npm run build --workspace=app && npm run copyStaticFiles && npm run start --workspace=server"
+  }
+}
