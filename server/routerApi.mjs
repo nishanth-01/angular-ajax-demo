@@ -17,35 +17,25 @@ function mwInject(key, value) {
   };
 }
 
-// check if defined and its type
-// if valid transforms 'string' to 'number'
-function mwValidateTransformQueryDelay(req, res, next) {
-  const delayString = req.query[QUERY.KEY.DELAY];
+// Validates and Transforms delay string to 'number'
+function mwValidateTransformDelay(req, res, next) {
+  const delayString = req.body[config.JSON.KEY.DELAY];
 
-  if(typeof delayString !== 'string') {
-    res.status(400).send('Missing/Invalid URL Query');
+  let n = NaN;
+  if(typeof delayString !== 'string'
+      && !(/^\d+$/.test(delayString))
+      && (n = Number(delayString))
+      && n < config.DELAY_MIN
+      && n > config.DELAY_MAX) {
+    res.status(400).end();
     return;
   }
 
-  if(!/^\d+$/s.test(delayString)) {
-    res.status(400).send('Invalid URL Query');
-    return;
-  }
-
-  const delayNumber = Number(delayString);
-
-  if(delayNumber === NaN) {
-    res.status(400).send('Invalid URL Query');
-    return;
-  }
-  if(delayNumber > MAX_DELAY) {
-  }
-  if(delayNumber < MIN_DELAY) {}
-  req.query[QUERY.KEY.DELAY] = n;
+  req.body[config.JSON.KEY.DELAY] = n;
   next();
-  return;
 }
 
+// check if defined and has a valid value
 function setSessionCookies(userId, sessionId, res) {
   if(!sessionId) {
     res.clearCookie(
@@ -186,8 +176,15 @@ function putApiDelay(req, res, next) {
     res.status(403).send('Requires Admin Access');
     return;
   }
-  delay = req.query.delay;
-  res.status(200).end();
+
+  const oldDelay = delay;
+  delay = req.body[config.JSON.KEY.DELAY];
+
+  const body = {};
+  body[config.JSON.KEY.Delay_OLD] = oldDelay.toString();
+  body[config.JSON.KEY.Delay] = delay.toString();
+
+  res.status(200).send(body);
 }
 
 function getApiUsers(req, res, next) {
@@ -243,11 +240,12 @@ export default function routerApi(express, db) {
 
   /* Required
    * - admin login
-   * - query with key 'config.query.delay' and a integer string of valid range
+   * - json body with 'config.query.delay' property with delay values
+   *   in milli seconds
    */
-  router.put('/delay', mwValidateCookiesSession, mwValidateTransformQueryDelay, mwInject('db', db), putApiDelay)
+  router.put('/delay', mwValidateCookiesSession, mwValidateTransformDelay, mwInject('db', db), putApiDelay)
 
-  router.all('*', (req, res) => { res.status(404).end() });
+  router.all('/*', (req, res) => { res.redirect(404, '/') });
 
   return router;
 }
