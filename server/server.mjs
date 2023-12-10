@@ -32,8 +32,6 @@ class BASE_PATH {
   static get HOME() { return #HOME }
 }
 
-main();
-
 function main() {
   const app = express();
   const db = new DataBase();
@@ -53,7 +51,7 @@ function main() {
     });
   }
 
-  app.use('/api', routerApi('/api', express, db));
+  app.use('/api', routerApi(express, db));
 
   app.use(express.static(config.STATIC_ROOT, {
     fallthrought: false,
@@ -68,3 +66,5 @@ function main() {
     console.log(`server started at ${addr.address}:${addr.port}`);
   });
 }
+
+main();

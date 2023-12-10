@@ -24,8 +24,13 @@ export const COOKIES = {
   }
 };
 
-export const QUERY = {
+export const JSON = {
   KEY: {
-    DELAY: 'delay'
+    DELAY: 'delay',
+    DELAY_OLD: 'delay_old',
   }
 };
+
+// in milli seconds
+export const MIN_DELAY = 0;
+export const MAX_DELAY = 60*1000;
