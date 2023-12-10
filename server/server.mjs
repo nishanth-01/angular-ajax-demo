@@ -26,6 +26,12 @@ const cookies = {
   },
 };
 
+class BASE_PATH {
+  static #HOME = '/';
+
+  static get HOME() { return #HOME }
+}
+
 main();
 
 function main() {
@@ -39,15 +45,22 @@ function main() {
   app.use(express.json());
   app.use(cookieParser());
 
-  // sub domains
-  app.use(vhost(config.API_DOMAIN, routerApi(express, db)));
+  if(process.env.NODE_ENV === 'development') {
+    // logging
+    app.use((req, res, next) => {
+      console.log(`${req.method} ${req.hostname}${req.path}`);
+      next();
+    });
+  }
+
+  app.use('/api', routerApi('/api', express, db));
 
   app.use(express.static(config.STATIC_ROOT, {
     fallthrought: false,
     dotfiles: 'deny',
   }));
 
-  app.all('*', (req, res) => { res.status(404).end('main') });
+  app.all('*', (req, res) => { res.redirect(404, BASE_PATH.HOME) });
 
   const server = http.createServer(app);
   server.listen(config.PORT, config.DOMAIN, () => {
