@@ -1,17 +1,17 @@
 import { setTimeout } from 'node:timers/promises';
 
-import * as config from '../config.mjs';
+import config from '../config.json' with { type: "json" };
 
 let globalApiDelay = 0;// in milli seconds
 
-// check if defined and its of type 'string'
+// check if defined and type check
 function mwValidateCookiesSession(req, res, next) {
   if(typeof req.cookies[config.COOKIES.KEY.USER_ID] === 'string'
       && typeof req.cookies[config.COOKIES.KEY.SESSION_ID] === 'string') {
     next();
     return;
   }
-  res.status(400).send('Invalid Cookies');
+  res.status(401).send('Invalid Cookies');
 }
 
 function mwInject(key, value) {
@@ -303,7 +303,7 @@ export default function routerApi(express, db) {
 
   /* Required
    * - admin login
-   * - json body with 'config.query.delay' property with delay values
+   * - json body with 'config.JSON.KEY.DELAY' property with value
    *   in milli seconds
    */
   router.put('/delay',

@@ -1,0 +1,36 @@
+{
+  "PROTOCOL": "http",
+  "DOMAIN": "localhost",
+  "PORT": 8080,
+  "BASE_PATH_HOME": "/",
+  "BASE_PATH_API": "/api",
+  "ENV_KEY": {
+    "STATIC_ROOT": "STATIC_ROOT"
+  },
+  "JSON": {
+    "KEY": {
+      "USER_ID":   "user_id",
+      "USER_ROLE": "user_role",
+      "PASSWORD":  "password",
+      "DELAY":     "delay",
+      "DELAY_OLD": "delay_old",
+      "USERS":     "users"
+    }
+  },
+  "COOKIES": {
+    "KEY": {
+      "USER_ID": "user_id",
+      "SESSION_ID": "session_id"
+    },
+    "OPTIONS": {
+      "USER_ID": {
+        "httpOnly": true
+      },
+      "SESSION_ID": {
+        "httpOnly": true
+      }
+    }
+  },
+  "DELAY_MIN": 0,
+  "DELAY_MAX": 60000
+}

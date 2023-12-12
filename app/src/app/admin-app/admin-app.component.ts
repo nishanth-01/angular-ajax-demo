@@ -5,7 +5,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observer, EMPTY, tap, catchError } from 'rxjs';
 
 import { BackendService, SetDelayResponse } from '../backend.service';
-import { DELAY_MAX } from '../common';
+import config from '../../../../config.json';
 
 @Injectable({ providedIn: 'root' })
 @Component({
@@ -23,7 +23,7 @@ export class AdminAppComponent implements OnInit {
   messageColor: 'red' | 'green' = 'green';
 
   get delayMax(): number {
-    return DELAY_MAX;
+    return config.DELAY_MAX;
   }
 
   constructor(private api: BackendService) {}
@@ -45,7 +45,7 @@ export class AdminAppComponent implements OnInit {
         validators: [
           Validators.required,
           Validators.min(0),
-          Validators.max(DELAY_MAX),
+          Validators.max(config.DELAY_MAX),
           Validators.pattern(/^\d+$/)
         ]
       }

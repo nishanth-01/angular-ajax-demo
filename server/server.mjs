@@ -4,11 +4,10 @@ import parseurl from 'parseurl';
 import cookieParser from 'cookie-parser';
 import vhost from 'vhost';
 
-import * as config from '../config.mjs'
-import routerApi from './routerApi.mjs';
+import config from '../config.json' with { type: "json" };
+import routerApi from './api.router.mjs';
 import DataBase from './database.mjs';
 
-const BASE_PATH_HOME = '/';
 
 // options should remain same for the cookies to work properly
 // set 'maxAge' to undegined for session cookies
@@ -29,7 +28,17 @@ const cookies = {
   },
 };
 
-function main() {
+(function () {
+  const STATIC_FILES_ROOT = process.argv[2];
+
+  if(!STATIC_FILES_ROOT) {
+    const scriptName = process.argv[1].match(/[^\/]*$/)[0];
+    console.error(`invalid arguments`);
+    console.error(`usage: node ${scriptName} [path to static fles]`);
+    process.exit(1);
+  }
+  console.log(STATIC_FILES_ROOT);//debug
+
   const app = express();
   const db = new DataBase();
 
@@ -52,18 +61,16 @@ function main() {
 
   app.use('/api', routerApi(express, db));
 
-  app.use(express.static(config.STATIC_ROOT, {
+  app.use(express.static(STATIC_FILES_ROOT, {
     fallthrought: false,
     dotfiles: 'deny',
   }));
 
-  app.all('*', (req, res) => { res.redirect(303, BASE_PATH_HOME) });
+  app.all('*', (req, res) => { res.redirect(303, config.BASE_PATH_HOME) });
 
   const server = http.createServer(app);
   server.listen(config.PORT, config.DOMAIN, () => {
     const addr = server.address();
     console.log(`server started at ${addr.address}:${addr.port}`);
   });
-}
-
-main();
+})();

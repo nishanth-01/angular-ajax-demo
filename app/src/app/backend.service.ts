@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpErrorResponse  } from '@angular/common/http';
-import { Observable, Observer, Subscriber, catchError } from 'rxjs'
+import { Observable, Observer, Subscriber, catchError } from 'rxjs';
 
-import { User } from './common'
+import config from '../../../config.json';
+import { User } from './common';
 
-
-export type LoginError = 'invalid' | 'server';
 
 export interface SetDelayResponse {
   delay_old: string;
@@ -15,10 +14,12 @@ export interface SetDelayResponse {
 
 @Injectable({ providedIn: 'root' })
 export class BackendService {
-  // TODO: don't hardcode
-  private baseUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) {}
+
+  get apiBaseUrl() {
+    return `${config.PROTOCOL}://${config.DOMAIN}:${config.PORT}${config.BASE_PATH_API}`;
+  }
 
   // TODO: implement all validators as a service
   private validDelay(s: string): boolean {
@@ -47,7 +48,7 @@ export class BackendService {
     }
 
     return new Observable<string>( (s: Subscriber<string>) => {
-      this.http.post(`${this.baseUrl}/login`,
+      this.http.post(`${this.apiBaseUrl}/login`,
         { user_id: userId, password: password })
         .subscribe({
           error: (err: HttpErrorResponse) => {
@@ -66,15 +67,15 @@ export class BackendService {
     });
   }
   logout(): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/logout`, null);
+    return this.http.post<void>(`${this.apiBaseUrl}/logout`, null);
   }
 
   getUser(): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/user`);
+    return this.http.get<User>(`${this.apiBaseUrl}/user`);
   }
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}/users`);
+    return this.http.get<User[]>(`${this.apiBaseUrl}/users`);
   }
 
   setDelay(delay: string): Observable<SetDelayResponse> {
@@ -82,7 +83,7 @@ export class BackendService {
       return this.throwError<SetDelayResponse>('Invalid Input');
     }
 
-    return this.http.put<SetDelayResponse>(`${this.baseUrl}/delay`,
+    return this.http.put<SetDelayResponse>(`${this.apiBaseUrl}/delay`,
       { delay: delay })
       .pipe(
         catchError((err: HttpErrorResponse, _) => {
