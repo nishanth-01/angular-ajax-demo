@@ -2,3 +2,5 @@
 <p>Confirm Logout</p><br>
 <button (click)='onLogoutRequest()'>Logout</button>
 <button (click)='onLogoutCancel()'>Cancel</button>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="errMsg">{{errMsg}}</p>

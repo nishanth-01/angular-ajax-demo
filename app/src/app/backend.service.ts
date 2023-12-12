@@ -74,18 +74,7 @@ export class BackendService {
   }
 
   getUsers(): Observable<User[]> {
-    return this.http
-      .get<User[]>(`${this.baseUrl}/users`)
-        .pipe(
-          catchError((err: HttpErrorResponse, _) => {
-            let errMsg = 'Error';
-            switch(err.status) {
-              case 400:
-                errMsg = '400';
-            }
-            return this.throwError<User[]>(errMsg);
-          })
-        );
+    return this.http.get<User[]>(`${this.baseUrl}/users`);
   }
 
   setDelay(delay: string): Observable<SetDelayResponse> {

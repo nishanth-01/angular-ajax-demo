@@ -1,11 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { Observer } from 'rxjs';
 
 import { User } from '../common'
-import { apiFetchUsers } from '../api'
+import { BackendService } from '../backend.service'
+
 
 @Component({
   selector: 'app-general-app',
@@ -16,23 +18,26 @@ import { apiFetchUsers } from '../api'
 })
 export class GeneralAppComponent implements OnInit{
   users: User[] = [];
-  loginError = false;
-  errorMessage = '';
+  errMsg = '';
+  loading = false;
+
+  constructor(
+    private router: Router,
+    private api: BackendService) {}
 
   private updateUsers() {
-    const res = apiFetchUsers();
-    this.loginError = false;
+    console.log(this.users[0]);//debug
+    this.loading = true;
 
-    if(res.err) {
-      if(res.err === 'login') {
-        this.loginError = true;
-        return
-      }
-      this.errorMessage = 'Unable to update';
-      return;
+    const onLoaded = (u: User[]) => {
+      this.users = u;
+      this.loading = false;
+    };
+    const onError = (e: HttpErrorResponse) => {
+      this.errMsg = e.status.toString(10);
+      this.loading = false;
     }
-
-    this.users = res.users;
+    this.api.getUsers().subscribe({ next: onLoaded, error: onError });
   }
 
   ngOnInit() {

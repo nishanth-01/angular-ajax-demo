@@ -8,7 +8,7 @@
 <label for="delay">API Delay :</label><br>
 <input id="delay" type="text" [formControl]="delayForm"/>
 <span> milli seconds<span>
-<div style="color:red;" *ngIf='delayForm.invalid'>Enter a number between 0 to {{MAX_DELAY}}</div>
+<div style="color:red;" *ngIf='delayForm.invalid'>Enter a number between 0 to {{delayMax}}</div>
 <br>
 <button type="button" [disabled]="delayForm.invalid" (click)="onSubmit()">Set Delay</button>
 

@@ -1,14 +1,19 @@
 <h2>Home</h2>
 <nav>
-<a routerLink="/app/admin">Admin</a>
+<a routerLink="/admin">Admin</a>
 | <a routerLink="/logout">Logout</a>
 </nav>
 
-<p *ngIf="loginError"><a routerLink="/login">Login</a> to continue</p>
-<p *ngIf="errorMessage">{{errorMessage}}</p>
-<button (click)="onUpdate()">Update</button><br>
+<p *ngIf="errMsg">{{errMsg}}</p>
 
-<div *ngFor="let user of users">
-  <div>Id:{{user.id}} Role:{{user.role}}</div>
-</div>
-<p *ngIf="!users.length">No Users Found</p>
+<div *ngIf="loading; else main">Loading...</div>
+<ng-template #main>
+  <div>
+    <button (click)="onUpdate()">Update</button><br>
+
+    <div *ngFor="let user of users">
+      <div>{{user.user_id}} ({{user.user_role}})</div>
+    </div>
+    <p *ngIf="!users.length">No Users Found</p>
+  </div>
+</ng-template>

@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormGroup, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observer } from 'rxjs';
 
-import { apiLogin } from '../api'
+import { BackendService } from '../backend.service'
 
 
 @Component({
@@ -18,6 +19,7 @@ import { apiLogin } from '../api'
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
+  //TODO: move validation to separate service
   private reUserId = /^[0-9]{4}$/;
   private rePassword = /^[a-z]{1,4}$/;
   // Initialized in ngOnInit
@@ -30,7 +32,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private api: BackendService
   ) {}
 
   ngOnInit() {
@@ -53,23 +56,16 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-    const res = apiLogin({
-      id: this.loginForm.value.userId.value,
-      password: this.loginForm.value.password.value
-    });
+    const onError = (err: string) => {
+      this.errMsg = 'Login Failed';
+    };
+    const onComplete = () => {
+      this.router.navigate(['/app']);
+    };
 
-    if(res.err) {
-      let msg = 'Request Failed';
-      if(res.err === 'WRONG') {
-        msg = 'Cannot find user';
-      }
-      if(res.err === 'INVALID') {
-        msg = 'Input Error';
-      }
-      this.errMsg = msg;
-      return;
-    }
-
-    this.router.navigate(['/app']);
+    this.api.login(
+      this.loginForm.value.userId,
+      this.loginForm.value.password
+    ).subscribe({ error: onError, complete: onComplete});
   }
 }

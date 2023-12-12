@@ -1,8 +1,8 @@
 export type LoginError = 'input' | 'server';
 
 export interface User {
-  id: string;
-  role: 'general' | 'admin';
+  user_id: string;
+  user_role: 'general' | 'admin';
 }
 
 export interface UserCredentials{
@@ -14,6 +14,8 @@ const pattern = {
   userId: /^[0-9]{4}$/,
   password: /^[a-z]{1,4}$/,
 }
+
+export const DELAY_MAX = 60*1000;
 
 // TODO: remove this
 export function validCredentials(id: string, pwd: string): boolean {

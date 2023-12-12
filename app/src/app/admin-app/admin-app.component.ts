@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Injectable } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Observer, EMPTY, tap, catchError } from 'rxjs';
 
-import { User } from '../common';
-import { apiDelay } from '../api';
-import * as config from '../../../config';
+import { BackendService, SetDelayResponse } from '../backend.service';
+import { DELAY_MAX } from '../common';
 
+@Injectable({ providedIn: 'root' })
 @Component({
   selector: 'app-admin-app',
   standalone: true,
@@ -15,14 +16,17 @@ import * as config from '../../../config';
   styleUrl: './admin-app.component.css'
 })
 export class AdminAppComponent implements OnInit {
-  MAX_DELAY = config.MAX_DELAY;
-
   // Initialized in ngOnInit
   // @ts-ignore: Object is possibly 'null'.
   delayForm: FormControl;
   message = '';
   messageColor: 'red' | 'green' = 'green';
 
+  get delayMax(): number {
+    return DELAY_MAX;
+  }
+
+  constructor(private api: BackendService) {}
 
   private showMessage(msg: string) {
     this.message = msg;
@@ -41,42 +45,36 @@ export class AdminAppComponent implements OnInit {
         validators: [
           Validators.required,
           Validators.min(0),
-          Validators.max(this.MAX_DELAY),
+          Validators.max(DELAY_MAX),
           Validators.pattern(/^\d+$/)
         ]
       }
     );
 
-    const res = apiDelay();
-    if (res.err) {
-      this.showError('Unable to fetch current delay');
-      return;
-    }
-    this.delayForm.reset(res.oldDelay.toString(10));
+    const observer: Partial<Observer<string>> = {
+      next: (res: string) => {
+        this.delayForm.reset(res);
+      },
+      error: (err: string) => {
+        this.delayForm.reset('0');
+        this.showError('Unable to get current delay');
+      }
+    };
+    this.api.getDelay().subscribe(observer);
   }
 
   onSubmit() {
-    const res = apiDelay(Number(this.delayForm.value));
-    if (res.err) {
-      if (res.oldDelay) {
-        this.delayForm.reset(res.oldDelay.toString());
-      }
-      this.delayForm.reset();
+    this.showMessage('Loading...');
+    const observer: Partial<Observer<SetDelayResponse>> = {
+      next: (res) => {
+        console.log(res);
+        this.showMessage(`API delay changed from ${res.delay_old} to ${res.delay} second${(res.delay=='1')?'':'s'}`);
+      },
+      error: (err) => {
+        this.showError(err);
+      },
+    };
 
-      let errMsg = 'Error';
-      if (res.err === 'client') {
-        this.showError('Invalid Input');
-        errMsg = 'Invalid Input';
-      }
-      if (res.err === 'server') {
-        this.showError('Server Error');
-        errMsg = 'Server Error';
-      }
-      this.showError(errMsg);
-      return;
-    }
-
-    this.delayForm.reset(res.newDelay.toString(10));
-    this.showMessage(`API delay changed from ${res.oldDelay} to ${res.newDelay} second${(res.newDelay==1)?'':'s'}`);
+    this.api.setDelay(this.delayForm.value).subscribe(observer);
   }
 }
