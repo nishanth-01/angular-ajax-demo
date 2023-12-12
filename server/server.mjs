@@ -8,29 +8,26 @@ import * as config from '../config.mjs'
 import routerApi from './routerApi.mjs';
 import DataBase from './database.mjs';
 
+const BASE_PATH_HOME = '/';
+
 // options should remain same for the cookies to work properly
+// set 'maxAge' to undegined for session cookies
 const cookies = {
   userId: {
     key: 'user_id',
     options: {
-      maxAge: undefined,// set 'undefined' for session cookies
+      maxAge: undefined,
       httpOnly: true,
     },
   },
   sessionId: {
     key: 'session_id',
     options: {
-      maxAge: undefined,// set 'undefined' for session cookies
+      maxAge: undefined,
       httpOnly: true,
     },
   },
 };
-
-class BASE_PATH {
-  static #HOME = '/';
-
-  static get HOME() { return #HOME }
-}
 
 function main() {
   const app = express();
@@ -47,6 +44,8 @@ function main() {
     // logging
     app.use((req, res, next) => {
       console.log(`${req.method} ${req.hostname}${req.path}`);
+      console.log(req.cookies);
+      console.log(req.body);
       next();
     });
   }
@@ -58,7 +57,7 @@ function main() {
     dotfiles: 'deny',
   }));
 
-  app.all('*', (req, res) => { res.redirect(404, BASE_PATH.HOME) });
+  app.all('*', (req, res) => { res.redirect(303, BASE_PATH_HOME) });
 
   const server = http.createServer(app);
   server.listen(config.PORT, config.DOMAIN, () => {

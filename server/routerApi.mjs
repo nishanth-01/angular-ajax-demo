@@ -1,9 +1,13 @@
+import { setTimeout } from 'node:timers/promises';
+
 import * as config from '../config.mjs';
+
+let globalApiDelay = 0;// in milli seconds
 
 // check if defined and its of type 'string'
 function mwValidateCookiesSession(req, res, next) {
-  if(typeof req.cookies[config.COOKIES.KEY.USERID] === 'string'
-      && typeof req.cookies[config.COOKIES.KEY.SESSIONID] === 'string') {
+  if(typeof req.cookies[config.COOKIES.KEY.USER_ID] === 'string'
+      && typeof req.cookies[config.COOKIES.KEY.SESSION_ID] === 'string') {
     next();
     return;
   }
@@ -17,16 +21,26 @@ function mwInject(key, value) {
   };
 }
 
+async function mwDelayApiRequests(req, res, next) {
+  if(!globalApiDelay) {
+    next();
+    return;
+  }
+
+  await setTimeout(globalApiDelay);
+  next();
+}
+
 // Validates and Transforms delay string to 'number'
 function mwValidateTransformDelay(req, res, next) {
-  const delayString = req.body[config.JSON.KEY.DELAY];
+  const delay = req.body[config.JSON.KEY.DELAY];
 
   let n = NaN;
-  if(typeof delayString !== 'string'
-      && !(/^\d+$/.test(delayString))
-      && (n = Number(delayString))
-      && n < config.DELAY_MIN
-      && n > config.DELAY_MAX) {
+  if(typeof delay !== 'string'
+      || !(/^\d+$/.test(delay))
+      || !(n = Number(delay))
+      || n < config.DELAY_MIN
+      || n > config.DELAY_MAX) {
     res.status(400).end();
     return;
   }
@@ -35,41 +49,64 @@ function mwValidateTransformDelay(req, res, next) {
   next();
 }
 
-// check if defined and has a valid value
 function setSessionCookies(userId, sessionId, res) {
   if(!sessionId) {
     res.clearCookie(
-      config.COOKIES.KEY.USERID,
-      config.COOKIES.OPTIONS.USERID);
+      config.COOKIES.KEY.USER_ID,
+      config.COOKIES.OPTIONS.USER_ID);
     res.clearCookie(
-      config.COOKIES.KEY.SESSIONID,
-      config.COOKIES.OPTIONS.SESSIONID);
+      config.COOKIES.KEY.SESSION_ID,
+      config.COOKIES.OPTIONS.SESSION_ID);
     return;
   }
   res.cookie(
-    config.COOKIES.KEY.USERID,
+    config.COOKIES.KEY.USER_ID,
     userId,
-    config.COOKIES.OPTIONS.USERID);
+    config.COOKIES.OPTIONS.USER_ID);
 
   res.cookie(
-    config.COOKIES.KEY.SESSIONID,
+    config.COOKIES.KEY.SESSION_ID,
     sessionId,
-    config.COOKIES.OPTIONS.SESSIONID);
+    config.COOKIES.OPTIONS.SESSION_ID);
 }
 
-// if already logged in reset validity
-function postApiLogin(req, res) {
-  let id, password;
-  if(res.body) {
-    if(typeof res.body[JSON_KEY.userId] === 'string') {
-      id = res.body[JSON_KEY.userId];
-    }
-    if(typeof res.body[JSON_KEY.userPassword] === 'string') {
-      password = res.body[JSON_KEY.userPassword];
-    }
+function getApiUser(req, res) {
+  const userId = req.cookies[config.COOKIES.KEY.USER_ID];
+  const sessionId = req.cookies[config.COOKIES.KEY.SESSION_ID];
+
+  if(typeof userId !== 'string' || typeof sessionId !== 'string') {
+    res.status(400).end();
+    console.log('YES');//debug
+    return;
   }
 
-  if(!id || !password) {
+  const db = res.locals.db;
+
+  const dbRes = db.getUser(userId);
+  if(dbRes.err) {
+    if(dbRes.err === 'notfound') {
+      res.status(404).end();
+      return;
+    }
+    if(dbRes.err === 'invalid') {
+      res.status(400).end();
+      return;
+    }
+    res.status(500).end();
+    return;
+  }
+
+  const user = {};
+  user[config.JSON.KEY.USER_ID] = dbRes.user.id;
+  user[config.JSON.KEY.USER_ROLE] = dbRes.user.role;
+  res.status(200).json(user);
+}
+
+function postApiLogin(req, res) {
+  const id = req.body[config.JSON.KEY.USER_ID];
+  const password = req.body[config.JSON.KEY.PASSWORD];
+
+  if(typeof id !== 'string' || typeof password !== 'string') {
     res.status(400).end();
     return;
   }
@@ -77,11 +114,11 @@ function postApiLogin(req, res) {
   const db = res.locals.db;
   const dbRetUser = db.getUser(id);
   if(dbRetUser.err) {
-    if(dbRetUser.err === 'invalid arguments') {
+    if(dbRetUser.err === 'invalid') {
       res.status(400).send('Invalid Arguments');
       return;
     }
-    if(dbRetUser.err === 'user not found') {
+    if(dbRetUser.err === 'notfound') {
       res.status(400).send('User Not Found');
       return;
     }
@@ -94,40 +131,40 @@ function postApiLogin(req, res) {
     return;
   }
 
-  const dbResponse = db.setSessionId(id, sessionId);
-  if(dbResponse.err) {
-    if(dbResponse.err === 'invalid arguments') {
+  // TODO: add security
+  const sessionId = 1;
+  const err = db.setSessionId(id, sessionId);
+  if(err) {
+    if(err === 'invalid arguments') {
       res.status(400).send('Invalid Arguments');
       return;
     }
-    if(dbResponse.err === 'user not found') {
+    if(err === 'user not found') {
       res.status(400).send('User Not Found');
       return;
     }
     res.status(500).end();
     return;
   }
-  // TODO: add security
-  const sessionId = 1;
-  setSessionCookies(sessionId, res);
+  setSessionCookies(id, sessionId, res);
 
   res.status(200).end();
 }
 
 function postApiLogout(req, res, next) {
-  const uId = req.cookies[config.COOKIES.userId.key];
-  const sId = req.cookies[config.COOKIES.sessionId.key];
+  const uId = req.cookies[config.COOKIES.KEY.USER_ID];
+  const sId = req.cookies[config.COOKIES.KEY.SESSION_ID];
 
   const db = res.locals.db;
   // database transaction should be atomic
   const dbRetUser = db.getUser(uId);
   if(dbRetUser.err) {
-    if(dbRetUser.err === 'invalid arguments') {
-      res.status(400).send('Invalid User Id');
+    if(dbRetUser.err === 'invalid') {
+      res.status(400).send();
       return;
     }
-    if(dbRetUser.err === 'user not found') {
-      res.status(400).send('User Not Found');
+    if(dbRetUser.err === 'notfound') {
+      res.status(404).send();
       return;
     }
     res.status(500).end();
@@ -135,22 +172,22 @@ function postApiLogout(req, res, next) {
   }
 
   if(dbRetUser.user.sessionId !== sId) {
-    res.status(400).send('Not Logged In');
+    res.status(401).send('Not Logged In');
     return;
   }
 
-  const dbRetSid = db.setSessionId(null, res);
-  if(dbRetSid.err) {
+  const err = db.setSessionId(null, res);
+  if(err) {
     res.status(500).end();
     return
   }
-  setSessionCookies(0, res);
+  setSessionCookies(uId, 0, res);
   res.status(200).end();
 }
 
 function putApiDelay(req, res, next) {
-  const uId = req.cookies[config.COOKIES.KEY.userId];
-  const sId = req.cookies[config.COOKIES.KEY.sessionId];
+  const uId = req.cookies[config.COOKIES.KEY.USER_ID];
+  const sId = req.cookies[config.COOKIES.KEY.SESSION_ID];
 
   const db = res.locals.db;
   // database transaction should be atomic
@@ -177,29 +214,29 @@ function putApiDelay(req, res, next) {
     return;
   }
 
-  const oldDelay = delay;
-  delay = req.body[config.JSON.KEY.DELAY];
+  const oldDelay = globalApiDelay;
+  globalApiDelay = req.body[config.JSON.KEY.DELAY];
 
   const body = {};
-  body[config.JSON.KEY.Delay_OLD] = oldDelay.toString();
-  body[config.JSON.KEY.Delay] = delay.toString();
+  body[config.JSON.KEY.DELAY_OLD] = oldDelay.toString(10);
+  body[config.JSON.KEY.DELAY] = globalApiDelay.toString(10);
 
-  res.status(200).send(body);
+  res.status(200).json(body);
 }
 
 function getApiUsers(req, res, next) {
-  const uId = req.cookies[config.COOKIES.KEY.userId];
-  const sId = req.cookies[config.COOKIES.KEY.sessionId];
+  const uId = req.cookies[config.COOKIES.KEY.USER_ID];
+  const sId = req.cookies[config.COOKIES.KEY.USER_ID];
 
   const db = res.locals.db;
   const dbRetUser = db.getUser(uId);
   if(dbRetUser.err) {
-    if(dbRetUser.err === 'invalid arguments') {
+    if(dbRetUser.err === 'invalid') {
       res.status(400).send('Invalid User Id');
       return;
     }
-    if(dbRetUser.err === 'User Not Found') {
-      res.status(400).send('User Not Found');
+    if(dbRetUser.err === 'notfound') {
+      res.status(404).send('User Not Found');
       return;
     }
     res.status(500).end();
@@ -211,41 +248,72 @@ function getApiUsers(req, res, next) {
     res.status(500).end();
     return;
   }
-  res.status(200).json({
-    userCount: dbRetUsers.users.length,
-    userList: dbRetUsers.users
-  });
+  const users = [];
+  for(let u of dbRetUsers.users) {
+    users.push({
+      [config.JSON.KEY.USER_ID]   : u.id,
+      [config.JSON.KEY.USER_ROLE] : u.role,
+    });
+  }
+  res.status(200).json(users);
 }
 
 export default function routerApi(express, db) {
   const router = express.Router();
 
+  router.use(mwDelayApiRequests);
+
+  /* Returns the logged in user, or 404
+   *
+   * Required
+   * - valid logged in cookies
+   * Response
+   * - User, on sucess
+   * - 404/400, if no valid login found
+   * - 500, on server error
+   */
+  router.get('/user',
+    mwInject('db', db),
+    getApiUser);
   /* Required
    * - general/admin login
    */
-  router.get('/users', mwValidateCookiesSession, mwInject('db', db), getApiUsers);
+  router.get('/users',
+    mwValidateCookiesSession,
+    mwInject('db', db),
+    getApiUsers);
 
   /* Behaviour
    * - if already logged in switches user
    *
    * Required
-   * - json body with 'JSON.userId', 'JSON.password' keys
+   * - json body with 'JSON.userId', 'JSON.password' properties
    */
-  router.post('/login', mwInject('db', db), postApiLogin)
+  router.post('/login',
+    mwInject('db', db),
+    postApiLogin);
 
   /* Required
    * - general/admin login
    */
-  router.post('/logout', mwValidateCookiesSession, mwInject('db', db), postApiLogout)
+  router.post('/logout',
+    mwValidateCookiesSession,
+    mwInject('db', db),
+    postApiLogout);
 
   /* Required
    * - admin login
    * - json body with 'config.query.delay' property with delay values
    *   in milli seconds
    */
-  router.put('/delay', mwValidateCookiesSession, mwValidateTransformDelay, mwInject('db', db), putApiDelay)
+  router.put('/delay',
+    mwValidateCookiesSession,
+    mwValidateTransformDelay,
+    mwInject('db', db),
+    putApiDelay);
 
-  router.all('/*', (req, res) => { res.redirect(404, '/') });
+  router.all('/*',
+    (req, res) => { res.redirect(404, '/') });
 
   return router;
 }

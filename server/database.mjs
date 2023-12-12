@@ -3,17 +3,23 @@ class User {
   role;//string 'admin' or 'general'
   password;//string /[a-z]{4}/
   sessionId;//string /\w{8}/
+
+  constructor(id, role, password, sessionId) {
+    this.id = id;
+    this.role = role;
+    this.password = password;
+    this.sessionId = sessionId;
+  }
 }
 
-const mockUser = new User('1234', 'general', 'asb', 'kdf43h_1');
 const mockUsers = [
-  new User('1234', 'general', 'asb', 'kdf43h_1'),
-  new User('1235', 'general', 'asb', 'kdf43h_2'),
-  new User('1236', 'admin', 'asb', 'kdf43h_3'),
-  new User('1237', 'admin', 'asb', 'kdf43h_4'),
-  new User('1238', 'admin', 'asb', 'kdf43h_5'),
-  new User('1239', 'general', 'asb', 'kdf43h_6'),
-  new User('1240', 'general', 'asb', 'kdf43h_7'),
+  new User('1234', 'general', 'asb', '1'),
+  new User('1235', 'general', 'asb', '1'),
+  new User('1236', 'admin',   'asb', '1'),
+  new User('1237', 'admin',   'asb', '1'),
+  new User('1238', 'admin',   'asb', '1'),
+  new User('1239', 'general', 'asb', '1'),
+  new User('1240', 'general', 'asb', '1'),
 ];
 
 export default class DataBase {
@@ -22,15 +28,20 @@ export default class DataBase {
   }
   close () {}
 
+  // errors '' | 'notfound' | 'invalid' | 'dberror'
   getUser(userId) {
-    return mockUser;
+    const user = mockUsers.find((u) =>  u.id === userId);
+    if(!user) return { err: 'user not found' };
+    return { user: user, err: '' };
   }
   // return a array that should be 'JSON.stringify()' able
   getUsers() {
-    return mockUsers;
+    return { users: mockUsers, err: '' };
   }
-  // return should be string, empty string on success
+  // return error as 'string', empty string on success
   // unset session id if 'sessionId' is null
   // session id is a 'number'
-  setSessionId(userId, sessionId) {}
+  setSessionId(userId, sessionId) {
+    return '';
+  }
 }
