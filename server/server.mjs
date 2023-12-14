@@ -29,8 +29,8 @@ const cookies = {
 };
 
 (function () {
-  const STATIC_FILES_ROOT = process.argv[2];
-
+  const STATIC_FILES_ROOT = '../static';
+/*
   if(!STATIC_FILES_ROOT) {
     const scriptName = process.argv[1].match(/[^\/]*$/)[0];
     console.error(`invalid arguments`);
@@ -38,7 +38,7 @@ const cookies = {
     process.exit(1);
   }
   console.log(STATIC_FILES_ROOT);//debug
-
+*/
   const app = express();
   const db = new DataBase();
 
@@ -50,7 +50,6 @@ const cookies = {
   app.use(cookieParser());
 
   if(process.env.NODE_ENV === 'development') {
-    // logging
     app.use((req, res, next) => {
       console.log(`${req.method} ${req.hostname}${req.path}`);
       console.log(req.cookies);
@@ -62,11 +61,11 @@ const cookies = {
   app.use('/api', routerApi(express, db));
 
   app.use(express.static(STATIC_FILES_ROOT, {
-    fallthrought: false,
     dotfiles: 'deny',
   }));
 
-  app.all('*', (req, res) => { res.redirect(303, config.BASE_PATH_HOME) });
+  app.get('/app/*', (req, res) => { res.redirect(303, config.BASE_PATH_HOME) });
+  app.all('*', (req, res) => { res.redirect(404, config.BASE_PATH_HOME) });
 
   const server = http.createServer(app);
   server.listen(config.PORT, config.DOMAIN, () => {
