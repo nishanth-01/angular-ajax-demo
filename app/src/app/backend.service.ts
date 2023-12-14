@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse, HttpErrorResponse  } from '@angular/common/http';
-import { Observable, Observer, Subscriber, catchError } from 'rxjs';
+import { HttpClient, HttpErrorResponse  } from '@angular/common/http';
+import { Observable, Subscriber, catchError } from 'rxjs';
 
 import config from '../../../config.json';
-import { User } from './common';
 
-// properties must match that of api response
+// properties names must match that of api response
+export interface User {
+  user_id: string;
+  user_role: 'general' | 'admin';
+}
+
 export interface SetDelayResponse {
   delay_old: string;
   delay: string;

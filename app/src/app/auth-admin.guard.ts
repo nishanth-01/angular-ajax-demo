@@ -2,8 +2,7 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn, UrlTree } from '@angular/router';
 import { Observable, Subscriber } from 'rxjs'
 
-import { BackendService } from './backend.service';
-import { User } from './common';
+import { BackendService, User } from './backend.service';
 
 export const authAdminGuard: CanActivateFn = (route, state) => {
   const api = inject(BackendService);

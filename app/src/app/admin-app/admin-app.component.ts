@@ -1,14 +1,13 @@
-import { Component, OnInit, Injectable } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observer, EMPTY, tap, catchError } from 'rxjs';
+import { Observer } from 'rxjs';
 
-import { BackendService, SetDelayResponse, GetDelayResponse } from '../backend.service';
+import { BackendService, SetDelayResponse } from '../backend.service';
 import config from '../../../../config.json';
 
-@Injectable({ providedIn: 'root' })
 @Component({
   selector: 'app-admin-app',
   standalone: true,

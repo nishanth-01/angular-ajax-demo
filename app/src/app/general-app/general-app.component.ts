@@ -1,18 +1,15 @@
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Observer } from 'rxjs';
 
-import { User } from '../common'
-import { BackendService } from '../backend.service'
+import { BackendService, User } from '../backend.service'
 
 
 @Component({
   selector: 'app-general-app',
   standalone: true,
-  imports: [CommonModule, ScrollingModule, RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './general-app.component.html',
   styleUrl: './general-app.component.css'
 })
