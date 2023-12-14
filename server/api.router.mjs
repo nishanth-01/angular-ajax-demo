@@ -217,11 +217,10 @@ function putApiDelay(req, res, next) {
   const oldDelay = globalApiDelay;
   globalApiDelay = req.body[config.JSON.KEY.DELAY];
 
-  const body = {};
-  body[config.JSON.KEY.DELAY_OLD] = oldDelay.toString(10);
-  body[config.JSON.KEY.DELAY] = globalApiDelay.toString(10);
-
-  res.status(200).json(body);
+  res.status(200).json({
+    [config.JSON.KEY.DELAY_OLD] : oldDelay.toString(10),
+    [config.JSON.KEY.DELAY]     : globalApiDelay.toString(10),
+  });
 }
 
 function getApiUsers(req, res, next) {
@@ -258,6 +257,38 @@ function getApiUsers(req, res, next) {
   res.status(200).json(users);
 }
 
+function getApiDelay(req, res) {
+  const uId = req.cookies[config.COOKIES.KEY.USER_ID];
+  const sId = req.cookies[config.COOKIES.KEY.SESSION_ID];
+
+  const db = res.locals.db;
+  // database transaction should be atomic
+  const dbRetUser = db.getUser(uId);
+  if(dbRetUser.err) {
+    if(dbRetUser.err === 'invalid') {
+      res.status(400).send('Invalid User Id');
+      return;
+    }
+    if(dbRetUser.err === 'notfound') {
+      res.status(404).send('User Not Found');
+      return;
+    }
+    res.status(500).end();
+    return;
+  }
+
+  if(dbRetUser.user.sessionId !== sId) {
+    res.status(401).end();
+    return;
+  }
+  if(dbRetUser.user.role !== 'admin') {
+    res.status(403).send('Requires Admin Access');
+    return;
+  }
+
+  res.status(200).json({ [config.JSON.KEY.DELAY]: globalApiDelay });
+}
+
 export default function routerApi(express, db) {
   const router = express.Router();
 
@@ -283,11 +314,22 @@ export default function routerApi(express, db) {
     mwInject('db', db),
     getApiUsers);
 
+  /* Request
+   * - valid admin login cookies
+   *
+   * Response
+   * - { config.JSON.KEY.DELAY: value }
+   */
+  router.get('/delay',
+    mwValidateCookiesSession,
+    mwInject('db', db),
+    getApiDelay);
+
   /* Behaviour
    * - if already logged in switches user
    *
    * Required
-   * - json body with 'JSON.userId', 'JSON.password' properties
+   * - json body with 'JSON.KEY.USER_ID', 'JSON.KEY.PASSWORD' properties
    */
   router.post('/login',
     mwInject('db', db),

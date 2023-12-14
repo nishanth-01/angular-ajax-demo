@@ -1,10 +1,11 @@
 import { Component, OnInit, Injectable } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observer, EMPTY, tap, catchError } from 'rxjs';
 
-import { BackendService, SetDelayResponse } from '../backend.service';
+import { BackendService, SetDelayResponse, GetDelayResponse } from '../backend.service';
 import config from '../../../../config.json';
 
 @Injectable({ providedIn: 'root' })
@@ -39,7 +40,7 @@ export class AdminAppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.delayForm = new FormControl('',
+    this.delayForm = new FormControl('0',
       {
         nonNullable: true,
         validators: [
@@ -55,7 +56,7 @@ export class AdminAppComponent implements OnInit {
       next: (res: string) => {
         this.delayForm.reset(res);
       },
-      error: (err: string) => {
+      error: (err: HttpErrorResponse) => {
         this.delayForm.reset('0');
         this.showError('Unable to get current delay');
       }

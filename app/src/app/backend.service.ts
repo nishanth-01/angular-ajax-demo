@@ -5,9 +5,13 @@ import { Observable, Observer, Subscriber, catchError } from 'rxjs';
 import config from '../../../config.json';
 import { User } from './common';
 
-
+// properties must match that of api response
 export interface SetDelayResponse {
   delay_old: string;
+  delay: string;
+}
+
+export interface GetDelayResponse {
   delay: string;
 }
 
@@ -99,8 +103,18 @@ export class BackendService {
 
   getDelay(): Observable<string> {
     return new Observable<string>( (s: Subscriber<string>) => {
-      //TODO: implement
-      s.next('0');
+      this.http.get<GetDelayResponse>(`${this.apiBaseUrl}/delay`)
+        .subscribe({
+          error: (err: HttpErrorResponse) => {
+            s.error(err);
+          },
+          next: (res: GetDelayResponse) => {
+            s.next(res.delay);
+          },
+          complete: () => {
+            s.complete();
+          }
+        });
     });
   }
 }
