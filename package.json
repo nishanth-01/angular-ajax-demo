@@ -5,11 +5,13 @@
     "server"
   ],
   "scripts": {
-    "precopy": "mkdir -p ./static && rm -rf ./static/*",
-    "copy": "cp -r ./app/dist/interview-demo/browser/* ./static",
-
+    "precopy": "rimraf -g \"static/*\"",
+    "copy": "cpy \"app/dist/interview-demo/browser/**/*\" \"static\"",
     "build": "npm run build --workspace=app",
-
-    "start": "npm run build && npm run copy && npm run start --workspace=server -- \"$PWD\"/static"
+    "start": "npm run build && npm run copy && npm run start --workspace=server"
+  },
+  "dependencies": {
+    "cpy-cli": "^5.0.0",
+    "rimraf": "^5.0.5"
   }
 }
