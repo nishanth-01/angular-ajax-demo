@@ -8,7 +8,8 @@
     "precopy": "rimraf -g \"static/*\"",
     "copy": "cpy \"app/dist/interview-demo/browser/**/*\" \"static\"",
     "build": "npm run build --workspace=app",
-    "start": "npm run build && npm run copy && npm run start --workspace=server"
+    "start": "npm run build && npm run copy && npm run start --workspace=server",
+    "startNoBuild": "npm run copy && npm run start --workspace=server"
   },
   "dependencies": {
     "cpy-cli": "^5.0.0",

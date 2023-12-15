@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule, FormGroup, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import config from '../../../../config.json';
 import { BackendService } from '../backend.service'
 
 
@@ -18,9 +20,8 @@ import { BackendService } from '../backend.service'
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
-  //TODO: move validation to separate service
-  private reUserId = /^[0-9]{4}$/;
-  private rePassword = /^[a-z]{1,4}$/;
+  private patternUserId = new RegExp(config.PATTERN.USER_ID);
+  private patternPassword = new RegExp(config.PATTERN.USER_PASSWORD);
   // Initialized in ngOnInit
   // @ts-ignore: Object is possibly 'null'.
   loginForm: FormGroup;
@@ -28,6 +29,7 @@ export class LoginComponent implements OnInit {
   userId: string = '';
   password: string = '';
   errMsg = '';
+  loading = false;
 
   constructor(
     private router: Router,
@@ -41,24 +43,27 @@ export class LoginComponent implements OnInit {
           nonNullable: true,
           validators: [
             Validators.required,
-            Validators.pattern(this.reUserId)
+            Validators.pattern(this.patternUserId)
           ]
       }],
       password: ['', {
           nonNullable: true,
           validators: [
             Validators.required,
-            Validators.pattern(this.rePassword)
+            Validators.pattern(this.patternPassword)
           ]
       }]
     });
   }
 
   onSubmit() {
-    const onError = (err: string) => {
+    this.loading = true;
+    const onError = (err: HttpErrorResponse) => {
+      this.loading = false;
       this.errMsg = 'Login Failed';
     };
     const onComplete = () => {
+      this.loading = false;
       this.router.navigate(['/app']);
     };
 

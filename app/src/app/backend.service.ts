@@ -7,7 +7,7 @@ import config from '../../../config.json';
 // properties names must match that of api response
 export interface User {
   user_id: string;
-  user_role: 'general' | 'admin';
+  user_role: string;
 }
 
 export interface SetDelayResponse {
@@ -29,19 +29,6 @@ export class BackendService {
     return `${config.PROTOCOL}://${config.DOMAIN}:${config.PORT}${config.BASE_PATH_API}`;
   }
 
-  // TODO: implement all validators as a service
-  private validDelay(s: string): boolean {
-    return true;
-  }
-
-  private validUserId(s: string): boolean {
-    return true;
-  }
-
-  private validPassword(s: string): boolean {
-    return true;
-  }
-
   private throwError<T>(errMsg: string): Observable<T> {
     return new Observable<T>(
       (s: Subscriber<T>) => {
@@ -50,30 +37,13 @@ export class BackendService {
     );
   }
 
-  login(userId: string, password: string): Observable<string> {
-    if ( !this.validUserId(userId) || !this.validPassword(password) ) {
-      return this.throwError<string>('Invalid Credentials');
-    }
-
-    return new Observable<string>( (s: Subscriber<string>) => {
-      this.http.post(`${this.apiBaseUrl}/login`,
-        { user_id: userId, password: password })
-        .subscribe({
-          error: (err: HttpErrorResponse) => {
-            let errMsg = 'Error';
-            switch(err.status) {
-              case 400:
-                errMsg = '400';
-                return;
-            }
-            s.error(errMsg);
-          },
-          complete: () => {
-            s.complete();
-          }
-        });
+  login(userId: string, password: string): Observable<void> {
+    return this.http.post<void>(`${this.apiBaseUrl}/login`, {
+      [config.JSON.KEY.USER_ID]: userId,
+      [config.JSON.KEY.PASSWORD]: password
     });
   }
+
   logout(): Observable<void> {
     return this.http.post<void>(`${this.apiBaseUrl}/logout`, null);
   }
@@ -87,22 +57,9 @@ export class BackendService {
   }
 
   setDelay(delay: string): Observable<SetDelayResponse> {
-    if( !this.validDelay(delay) ) {
-      return this.throwError<SetDelayResponse>('Invalid Input');
-    }
-
-    return this.http.put<SetDelayResponse>(`${this.apiBaseUrl}/delay`,
-      { delay: delay })
-      .pipe(
-        catchError((err: HttpErrorResponse, _) => {
-          let errMsg = '';
-          switch(err.status) {
-            case 400:
-              errMsg = '400';
-          }
-          return this.throwError<SetDelayResponse>(errMsg);
-        })
-      );
+    return this.http.put<SetDelayResponse>(`${this.apiBaseUrl}/delay`, {
+      [config.JSON.KEY.DELAY]: delay
+    });
   }
 
   getDelay(): Observable<string> {

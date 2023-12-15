@@ -32,5 +32,10 @@
     }
   },
   "DELAY_MIN": 0,
-  "DELAY_MAX": 60000
+  "DELAY_MAX": 99999,
+  "PATTERN": {
+    "USER_ID": "^\\d{4}$",
+    "USER_PASSWORD": "^[a-z]{1,4}$",
+    "DELAY": "^\\d{1,5}$"
+  }
 }

@@ -1,2 +1,4 @@
 - add tests
 - timeout for network requests
+- OAuth2 authentication
+- bug: angular pushState paths not found

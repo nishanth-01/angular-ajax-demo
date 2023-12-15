@@ -1,4 +1,3 @@
-- replace boolean expressions invloving 'NaN' if '0' is a valid value
 - throttle button clicks
 - improved GUI
 - service for input validation

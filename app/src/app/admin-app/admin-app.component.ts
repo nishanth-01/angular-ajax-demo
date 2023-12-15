@@ -44,9 +44,7 @@ export class AdminAppComponent implements OnInit {
         nonNullable: true,
         validators: [
           Validators.required,
-          Validators.min(0),
-          Validators.max(config.DELAY_MAX),
-          Validators.pattern(/^\d+$/)
+          Validators.pattern(config.PATTERN.DELAY)
         ]
       }
     );
@@ -70,8 +68,8 @@ export class AdminAppComponent implements OnInit {
         console.log(res);
         this.showMessage(`API delay changed from ${res.delay_old} to ${res.delay} second${(res.delay=='1')?'':'s'}`);
       },
-      error: (err) => {
-        this.showError(err);
+      error: (err: HttpErrorResponse) => {
+        this.showError('server returned '+err.status.toString());
       },
     };
 
