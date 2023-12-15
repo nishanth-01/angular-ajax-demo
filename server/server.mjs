@@ -64,8 +64,7 @@ const cookies = {
     dotfiles: 'deny',
   }));
 
-  app.get('/app/*', (req, res) => { res.redirect(303, config.BASE_PATH_HOME) });
-  app.all('*', (req, res) => { res.redirect(404, config.BASE_PATH_HOME) });
+  app.get('*', (req, res) => { res.redirect(303, config.BASE_PATH_HOME) });
 
   const server = http.createServer(app);
   server.listen(config.PORT, config.DOMAIN, () => {

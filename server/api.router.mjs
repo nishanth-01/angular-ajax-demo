@@ -76,7 +76,6 @@ function getApiUser(req, res) {
 
   if(typeof userId !== 'string' || typeof sessionId !== 'string') {
     res.status(400).end();
-    console.log('YES');//debug
     return;
   }
 
