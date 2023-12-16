@@ -1,19 +1,54 @@
-<h2>Home</h2>
-<nav>
-<a routerLink="/admin">Admin</a>
-| <a routerLink="/logout">Logout</a>
-</nav>
+<!-- Tool Bar -->
+<p>
+  <mat-toolbar>
+    <span>Home</span>
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button (click)="goToAdmin()" mat-menu-item>
+        <span>Admin</span>
+      </button>
+      <button (click)="onLogout()" mat-menu-item>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+</p>
 
 <p *ngIf="errMsg">{{errMsg}}</p>
 
-<div *ngIf="loading; else main">Loading...</div>
-<ng-template #main>
-  <div>
-    <button (click)="onUpdate()">Update</button><br>
+<button mat-stroked-button (click)="onUpdate()">Update</button>
 
-    <div *ngFor="let user of users">
-      <div>{{user.user_id}} ({{user.user_role}})</div>
-    </div>
-    <p *ngIf="!users.length">No Users Found</p>
-  </div>
-</ng-template>
+<!-- Loading Bar -->
+<mat-progress-bar mode="indeterminate" *ngIf="loading">
+</mat-progress-bar>
+
+<!-- Users Table -->
+<table mat-table [dataSource]="users">
+  <!-- Id Column -->
+  <ng-container matColumnDef="user_id">
+    <th mat-header-cell *matHeaderCellDef>
+      ID
+    </th>
+
+    <td mat-cell *matCellDef="let user">
+      {{user.user_id}}
+    </td>
+  </ng-container>
+
+  <!-- Role Column -->
+  <ng-container matColumnDef="user_role">
+    <th mat-header-cell *matHeaderCellDef>
+      Role
+    </th>
+
+    <td mat-cell *matCellDef="let user">
+      {{user.user_role}}
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

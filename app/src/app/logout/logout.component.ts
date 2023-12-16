@@ -3,12 +3,21 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { BackendService } from '../backend.service';
 
 @Component({
   selector: 'app-logout',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './logout.component.html',
   styleUrl: './logout.component.css'
 })
@@ -18,18 +27,19 @@ export class LogoutComponent {
 
   constructor(
     private router: Router,
-    private api: BackendService
+    private api: BackendService,
+    public dialogRef: MatDialogRef<LogoutComponent>
   ) {}
 
-  onLogoutRequest() {
+  onConfirm() {
     const goToLogin = () => {
       this.loading = false;
+      this.dialogRef.close();
       this.router.navigate(['/login']);
     };
 
-    this.loading = true;
-
     const showError = (err: HttpErrorResponse) => {
+      this.loading = false;
       switch(err.status) {
         case 400:
           this.errMsg = 'Invalid Request';
@@ -46,8 +56,9 @@ export class LogoutComponent {
         default:
           this.errMsg = 'Something went wrong';
       }
-      this.loading = false;
     };
+
+    this.loading = true;
 
     this.api.logout().subscribe({
       error: showError,
@@ -55,8 +66,7 @@ export class LogoutComponent {
     });
   }
 
-  onLogoutCancel() {
-    // TODO: redirect to previous page
-    this.router.navigate(['/app']);
+  onCancel() {
+    this.dialogRef.close();
   }
 }

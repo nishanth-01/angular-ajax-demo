@@ -4,9 +4,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule, FormGroup, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+
 import config from '../../../../config.json';
 import { BackendService } from '../backend.service'
-
 
 @Component({
   selector: 'app-login',
@@ -14,7 +18,11 @@ import { BackendService } from '../backend.service'
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressBarModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'

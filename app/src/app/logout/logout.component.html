@@ -1,6 +1,11 @@
-<h2>Logout</h2>
-<p>Confirm Logout</p><br>
-<button (click)='onLogoutRequest()'>Logout</button>
-<button (click)='onLogoutCancel()'>Cancel</button>
-<p *ngIf="loading">Loading...</p>
+<h2 mat-dialog-title>Confirm Logout</h2>
+<mat-dialog-actions align="center">
+  <button mat-stroked-button (click)="onConfirm()">
+    <mat-spinner [diameter]="25" *ngIf="loading; else default"></mat-spinner>
+    <ng-template #default>Logout</ng-template>
+  </button>
+  <button mat-stroked-button (click)="onCancel()">Cancel</button>
+</mat-dialog-actions>
+
+<!-- Error Message -->
 <p *ngIf="errMsg">{{errMsg}}</p>

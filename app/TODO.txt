@@ -5,3 +5,4 @@
   - unsubscribe observables
 - if already logged in show the logged in user info and ask if to switch user, change user button
 - move hardcoded global configuration variables to config.json
+- remove response types from backend.service use config.JSON.*, add validation for response
