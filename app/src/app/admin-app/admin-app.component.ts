@@ -10,9 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { BackendService, SetDelayResponse } from '../backend.service';
 import { LogoutComponent } from '../logout/logout.component';
@@ -29,12 +29,12 @@ import config from '../../../../config.json';
     MatFormFieldModule,
     MatInputModule,
     MatToolbarModule,
-    MatProgressSpinnerModule,
     MatIconModule,
     MatMenuModule,
+    MatProgressBarModule,
   ],
   templateUrl: './admin-app.component.html',
-  styleUrl: './admin-app.component.css'
+  styleUrls: ['./admin-app.component.css', '/src/styles/toolbar-page.css'],
 })
 export class AdminAppComponent implements OnInit {
   // Initialized in ngOnInit

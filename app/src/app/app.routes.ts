@@ -28,7 +28,7 @@ export const routes: Routes = [
   },
   {
     path: 'app',
-    title: 'App',
+    title: 'Home',
     component: GeneralAppComponent,
     canActivate: [authGuard],
   },

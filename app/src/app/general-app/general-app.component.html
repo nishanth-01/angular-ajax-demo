@@ -1,54 +1,63 @@
-<!-- Tool Bar -->
-<p>
-  <mat-toolbar>
-    <span>Home</span>
-    <span class="spacer"></span>
-    <button mat-icon-button [matMenuTriggerFor]="menu">
-      <mat-icon>more_vert</mat-icon>
-    </button>
-    <mat-menu #menu="matMenu">
-      <button (click)="goToAdmin()" mat-menu-item>
-        <span>Admin</span>
+<div class="page">
+  <!-- Tool Bar -->
+  <nav>
+    <mat-toolbar>
+      <span>Home</span>
+      <span class="spacer"></span>
+
+      <!-- Refresh Button -->
+      <button mat-icon-button (click)="onUpdate()">
+        <mat-icon>refresh</mat-icon>
       </button>
-      <button (click)="onLogout()" mat-menu-item>
-        <span>Logout</span>
+
+      <!-- Menu -->
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
       </button>
-    </mat-menu>
-  </mat-toolbar>
-</p>
+      <mat-menu #menu="matMenu">
+        <button (click)="goToAdmin()" mat-menu-item>
+          <span>Admin</span>
+        </button>
+        <button (click)="onLogout()" mat-menu-item>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
 
-<p *ngIf="errMsg">{{errMsg}}</p>
+    <!-- Loading Bar -->
+    <mat-progress-bar mode="indeterminate" *ngIf="loading">
+    </mat-progress-bar>
+  </nav>
 
-<button mat-stroked-button (click)="onUpdate()">Update</button>
+  <p *ngIf="errMsg">{{errMsg}}</p>
 
-<!-- Loading Bar -->
-<mat-progress-bar mode="indeterminate" *ngIf="loading">
-</mat-progress-bar>
+  <!-- Users Table -->
+  <div>
+    <table mat-table [dataSource]="users">
+      <!-- Id Column -->
+      <ng-container matColumnDef="user_id">
+        <th mat-header-cell *matHeaderCellDef>
+          User ID
+        </th>
 
-<!-- Users Table -->
-<table mat-table [dataSource]="users">
-  <!-- Id Column -->
-  <ng-container matColumnDef="user_id">
-    <th mat-header-cell *matHeaderCellDef>
-      ID
-    </th>
+        <td mat-cell *matCellDef="let user">
+          {{user.user_id}}
+        </td>
+      </ng-container>
 
-    <td mat-cell *matCellDef="let user">
-      {{user.user_id}}
-    </td>
-  </ng-container>
+      <!-- Role Column -->
+      <ng-container matColumnDef="user_role">
+        <th mat-header-cell *matHeaderCellDef>
+          Role
+        </th>
 
-  <!-- Role Column -->
-  <ng-container matColumnDef="user_role">
-    <th mat-header-cell *matHeaderCellDef>
-      Role
-    </th>
+        <td mat-cell *matCellDef="let user">
+          {{user.user_role}}
+        </td>
+      </ng-container>
 
-    <td mat-cell *matCellDef="let user">
-      {{user.user_role}}
-    </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>

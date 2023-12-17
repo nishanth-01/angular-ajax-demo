@@ -29,7 +29,7 @@ import { LogoutComponent } from '../logout/logout.component'
     MatMenuModule,
   ],
   templateUrl: './general-app.component.html',
-  styleUrl: './general-app.component.css',
+  styleUrls: ['./general-app.component.css', '/src/styles/toolbar-page.css'],
 })
 export class GeneralAppComponent implements AfterViewInit {
 

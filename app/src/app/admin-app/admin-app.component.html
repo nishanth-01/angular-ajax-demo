@@ -1,48 +1,56 @@
-<!-- Tool Bar -->
-<p>
-  <mat-toolbar>
-    <span>Admin</span>
+<div class="page">
+  <!-- Tool Bar -->
+  <nav>
+    <mat-toolbar>
+      <span>Admin</span>
 
-    <span class="spacer"></span>
+      <span class="spacer"></span>
 
-    <button mat-icon-button [matMenuTriggerFor]="menu">
-      <mat-icon>more_vert</mat-icon>
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="goToHome()">
+          <span>Home</span>
+        </button>
+        <button mat-menu-item (click)="onLogout()">
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <!-- Loading Bar -->
+    <mat-progress-bar mode="indeterminate" *ngIf="loading">
+    </mat-progress-bar>
+  </nav>
+
+  <!-- Delay Input -->
+  <div class="set-delay-box">
+    <mat-form-field appearance="outline">
+      <mat-label>API Delay</mat-label>
+      <input type="text" matInput [formControl]="delayForm"/>
+      <br>
+      <span matTextSuffix>ms</span>
+      @if (delayForm.invalid) {
+        <mat-error>
+          Number between 0 to {{delayMax}}
+        </mat-error>
+      }
+    </mat-form-field>
+
+  <!-- Set Delay Button -->
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="delayForm.invalid"
+      (click)="onSubmit()"
+      formnovalidate>
+      Set Delay
     </button>
+  </div>
 
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item (click)="goToHome()">
-        <span>Home</span>
-      </button>
-      <button mat-menu-item (click)="onLogout()">
-        <span>Logout</span>
-      </button>
-    </mat-menu>
-  </mat-toolbar>
-</p>
+  <!-- Error Message -->
+  <p style="color:red">{{errMsg}}</p>
 
-<!-- Delay Input -->
-<mat-form-field>
-  <mat-label>API Delay</mat-label>
-  <input type="text" matInput [formControl]="delayForm"/><br>
-  <span matTextSuffix>ms</span>
-  @if (delayForm.invalid) {
-    <mat-error>Number between 0 to {{delayMax}}</mat-error>
-  }
-</mat-form-field>
-<br>
-
-<!-- Set Delay Button -->
-<button
-  mat-stroked-button
-  type="button"
-  [disabled]="delayForm.invalid"
-  (click)="onSubmit()"
-  formnovalidate>
-  <mat-spinner [diameter]="25" *ngIf="loading; else default"></mat-spinner>
-  <ng-template #default>Set Delay</ng-template>
-</button>
-
-
-<!-- Error Message -->
-<br>
-<p style="color:red">{{errMsg}}</p>
+</div>
