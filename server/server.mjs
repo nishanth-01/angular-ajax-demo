@@ -2,7 +2,7 @@ import http from 'node:http';
 import express from 'express';
 import parseurl from 'parseurl';
 import cookieParser from 'cookie-parser';
-import vhost from 'vhost';
+import open from 'open';
 
 import config from '../config.json' with { type: "json" };
 import routerApi from './api.router.mjs';
@@ -70,5 +70,10 @@ const cookies = {
   server.listen(config.PORT, config.DOMAIN, () => {
     const addr = server.address();
     console.log(`server started at ${addr.address}:${addr.port}`);
+
+    open(`${config.PROTOCOL}://${addr.address}:${addr.port}`)
+      .catch(() => {
+        console.log('error: unable to open browser, open url manually');
+      });
   });
 })();

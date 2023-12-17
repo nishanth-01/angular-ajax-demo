@@ -1,6 +1,6 @@
 {
   "PROTOCOL": "http",
-  "DOMAIN": "localhost",
+  "DOMAIN": "127.0.0.1",
   "PORT": 8080,
   "BASE_PATH_HOME": "/",
   "BASE_PATH_API": "/api",
