@@ -118,7 +118,7 @@ function postApiLogin(req, res) {
       return;
     }
     if(dbRetUser.err === 'notfound') {
-      res.status(400).send('User Not Found');
+      res.status(404).send('User Not Found');
       return;
     }
     res.status(500).end();

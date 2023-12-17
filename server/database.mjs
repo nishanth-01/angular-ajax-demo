@@ -12,31 +12,26 @@ class User {
   }
 }
 
-const mockUsers = [
-  new User('1234', 'general', 'asb', '1'),
-  new User('1235', 'general', 'asb', '1'),
-  new User('1236', 'admin',   'asb', '1'),
-  new User('1237', 'admin',   'asb', '1'),
-  new User('1238', 'admin',   'asb', '1'),
-  new User('1239', 'general', 'asb', '1'),
-  new User('1240', 'general', 'asb', '1'),
-];
-
 export default class DataBase {
+  mockUsers = [];
   init () {
-    // throw exception if failed
+    for(let i=1000; i<1032; i++) {
+      this.mockUsers
+        .push(new User(i.toString(10), (i%2)?'admin':'general', 'asb', '1'));
+    }
   }
+
   close () {}
 
   // errors '' | 'notfound' | 'invalid' | 'dberror'
   getUser(userId) {
-    const user = mockUsers.find((u) =>  u.id === userId);
-    if(!user) return { err: 'user not found' };
+    const user = this.mockUsers.find((u) =>  u.id === userId);
+    if(!user) return { err: 'notfound' };
     return { user: user, err: '' };
   }
   // return a array that should be 'JSON.stringify()' able
   getUsers() {
-    return { users: mockUsers, err: '' };
+    return { users: this.mockUsers, err: '' };
   }
   // return error as 'string', empty string on success
   // unset session id if 'sessionId' is null
