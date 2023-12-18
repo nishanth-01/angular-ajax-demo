@@ -9,25 +9,6 @@ import routerApi from './api.router.mjs';
 import DataBase from './database.mjs';
 
 
-// options should remain same for the cookies to work properly
-// set 'maxAge' to undegined for session cookies
-const cookies = {
-  userId: {
-    key: 'user_id',
-    options: {
-      maxAge: undefined,
-      httpOnly: true,
-    },
-  },
-  sessionId: {
-    key: 'session_id',
-    options: {
-      maxAge: undefined,
-      httpOnly: true,
-    },
-  },
-};
-
 (function () {
   const STATIC_FILES_ROOT = '../static';
 /*
@@ -47,6 +28,7 @@ const cookies = {
 
   // common middlewares
   app.use(express.json());
+  // options should remain same for the cookies to work properly
   app.use(cookieParser());
 
   if(process.env.NODE_ENV === 'development') {
